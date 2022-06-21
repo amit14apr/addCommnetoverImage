@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+   <body>
+      <div><label>Image File:</label>
+      <input type="file" id="imageLoader" name="imageLoader"/>
+	  </div>
+      <canvas id="imageCanvas" width="700" height="700"></canvas>
+      <script>
+         var canvas = document.getElementById('imageCanvas');
+         var context = canvas.getContext("2d");
+         var mapSprite = new Image();
+         // Map sprite
+         
+         var Marker = function () {
+             this.Sprite = new Image();
+             this.Sprite.src = "http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|FE7569"
+             this.Width = 21;
+             this.Height = 34;
+             this.XPos = 0;
+             this.YPos = 0;
+         }
+         
+         var Markers = new Array();
+         
+         var mouseClicked = function (mouse) {
+             var rect = canvas.getBoundingClientRect();
+             var mouseXPos = (mouse.x - rect.left);
+             var mouseYPos = (mouse.y - rect.top);
+         
+             console.log("Marker added");
+         
+             var marker = new Marker();
+             marker.XPos = mouseXPos - (marker.Width / 2);
+             marker.YPos = mouseYPos - marker.Height;
+             Markers.push(marker);
+         	marker.Sprite.onload = function(){
+         			draw()
+         		}
+         }
+         
+         // Add mouse click event listener to canvas
+         canvas.addEventListener("click", mouseClicked, true);
+         
+         var firstLoad = function () {
+             context.font = "15px Georgia";
+             context.textAlign = "center";
+         }
+         
+         var main = function () {
+         var imageLoader = document.getElementById('imageLoader');
+         imageLoader.addEventListener('change', handleImage, false);
+         var canvas = document.getElementById('imageCanvas');
+         var ctx = canvas.getContext('2d');
+         
+         
+         function handleImage(e){
+         var reader = new FileReader();
+         reader.onload = function(event){
+         
+         mapSprite.src = event.target.result;
+         }
+         reader.readAsDataURL(e.target.files[0]);     
+         }
+         
+         
+         		mapSprite.onload = function(){
+         			draw()
+         		}
+         };
+         
+         firstLoad();
+         
+         var person = [];
+            var count = 0;
+         var fillTextVal = function (positionY) {
+         let textData ='';
+         	if(person[count]) {
+         	textData = person[count]
+            count=count+1;
+         	} else {
+         		textData = prompt("Please enter Email", "");
+         		person.push(textData);
+                  count =0;
+         	}
+           return textData;
+         }
+         
+         var draw = function () {
+             context.fillStyle = "#000";
+             context.fillRect(0, 0, canvas.width, canvas.height);
+         	context.drawImage(mapSprite, 0, 0, 700, 700);
+         
+             for (var i = 0; i < Markers.length; i++) {
+                 var tempMarker = Markers[i];
+                 context.drawImage(tempMarker.Sprite, tempMarker.XPos, tempMarker.YPos, tempMarker.Width, tempMarker.Height);
+         
+                 var markerText = fillTextVal(tempMarker.YPos);
+         
+                 var textMeasurements = context.measureText(markerText);
+                 context.fillStyle = "#666";
+                 context.globalAlpha = 0.7;
+                 context.fillRect(tempMarker.XPos - (textMeasurements.width / 2), tempMarker.YPos - 15, textMeasurements.width, 20);
+                 context.globalAlpha = 1;
+                 context.fillStyle = "#000";
+                 context.fillText(markerText, tempMarker.XPos, tempMarker.YPos);
+             }
+         	
+         };
+         main();
+         
+      </script>
+   </body>
+</html>
